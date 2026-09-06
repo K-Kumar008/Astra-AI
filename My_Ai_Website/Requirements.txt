@@ -1,4 +1,4 @@
-Create a file named `requirements.txt` inside your `my-ai-website` folder.
+
 
 ### `requirements.txt`
 
