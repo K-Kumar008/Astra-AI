@@ -815,3 +815,559 @@ AI Model Gateway
 The next major development task is completing image generation and connecting the generated image response to the Astra frontend.
 
 The project is being developed incrementally, with each API integration tested before being incorporated into the final application.
+
+
+
+
+
+
+# Astra AI — AI Assistant Website
+
+A Flask-based AI assistant website developed as a learning project to understand how a frontend, Python backend, and external AI API work together.
+
+The project focuses on building a simple chat application, securely connecting to an AI provider, testing API authentication, discovering available models, and investigating image-generation capabilities.
+
+## Project Overview
+
+Astra AI is a web-based AI assistant that allows users to enter questions and receive AI-generated responses through a browser interface.
+
+The application was developed using **HTML, CSS, JavaScript, Python, and Flask**. The Flask backend acts as an intermediary between the frontend and the external AI API. This architecture keeps the API key on the server side instead of exposing it in the browser.
+
+The project was developed as a practical learning exercise to understand API integration, backend development, frontend-to-backend communication, authentication testing, and troubleshooting.
+
+## Features
+
+* AI chat interface
+* Flask backend
+* External AI API integration
+* Environment-variable-based API key configuration
+* Available model discovery
+* Model selection
+* Frontend-to-backend communication
+* API authentication testing
+* Backend error handling
+* Image-generation capability investigation
+* Project documentation and screenshots
+
+## Project Architecture
+
+The application follows a simple three-layer architecture:
+
+```text
+User
+  │
+  ▼
+Frontend (HTML / CSS / JavaScript)
+  │
+  │ POST /chat
+  ▼
+Flask Backend (app.py)
+  │
+  │ Authenticated API Request
+  ▼
+External AI API
+  │
+  ▼
+AI Model Response
+  │
+  ▼
+Flask Backend
+  │
+  ▼
+Frontend
+  │
+  ▼
+User
+```
+
+The frontend collects the user's message and sends it to the Flask backend. The backend validates the request, sends it to the external AI API using the configured API key, and returns the AI-generated response to the frontend.
+
+## Technologies Used
+
+| Technology                 | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| Python                     | Backend programming                        |
+| Flask                      | Web framework                              |
+| HTML                       | Frontend structure                         |
+| CSS                        | Frontend styling                           |
+| JavaScript                 | Frontend interaction and API communication |
+| OpenAI Python SDK          | AI API integration                         |
+| External AI API            | AI model access                            |
+| Kali Linux                 | Development environment                    |
+| Python virtual environment | Dependency isolation                       |
+| Git                        | Version control                            |
+| GitHub                     | Project hosting                            |
+
+## Project Structure
+
+```text
+my-ai-website/
+│
+├── app.py
+├── index.html
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── docs/
+│   └── project-documentation.md
+│
+├── screenshots/
+│   ├── 01-project-files.png
+│   ├── 02-flask-backend.png
+│   ├── 03-flask-server.png
+│   ├── 04-frontend.png
+│   ├── 05-backend-error.png
+│   └── 06-successful-chat.png
+│
+└── venv/                 # Not uploaded to GitHub
+```
+
+## Development Environment
+
+The project was developed in **Kali Linux** using Python and a virtual environment.
+
+The virtual environment was created to keep the project's dependencies separate from the system Python installation.
+
+### Create the virtual environment
+
+```bash
+python3 -m venv venv
+```
+
+### Activate the virtual environment
+
+```bash
+source venv/bin/activate
+```
+
+### Install dependencies
+
+```bash
+pip install flask openai
+```
+
+## Creating the Flask Backend
+
+The Flask backend is implemented in `app.py`.
+
+Its main responsibilities are:
+
+1. Initialize the Flask application.
+2. Serve the frontend.
+3. Receive chat messages.
+4. Validate incoming requests.
+5. Send requests to the external AI API.
+6. Return the AI response to the frontend.
+7. Handle errors when the request cannot be completed.
+
+The backend provides a `/chat` endpoint that accepts a user message and returns a response.
+
+## Connecting the AI API
+
+The application uses the OpenAI Python SDK to communicate with the external AI API.
+
+The backend configures the client using the provider's API key and base URL.
+
+Example:
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.environ.get("EXPLABS_API_KEY"),
+    base_url="https://api.experientiallabs.ai/v1"
+)
+```
+
+The API request is sent from the backend rather than directly from the browser.
+
+This approach helps protect the API key and keeps the integration logic in one place.
+
+## API Key Security
+
+The API key is stored in an environment variable:
+
+```bash
+export EXPLABS_API_KEY="your_api_key_here"
+```
+
+The application reads the key using:
+
+```python
+os.environ.get("EXPLABS_API_KEY")
+```
+
+The actual API key should **never be committed to GitHub**.
+
+The `.gitignore` file is used to prevent environment files and unnecessary Python files from being uploaded.
+
+Example `.gitignore`:
+
+```gitignore
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+```
+
+> **Security note:** If an API key is accidentally exposed, it should be revoked and replaced immediately.
+
+## Testing API Authentication
+
+API authentication was tested using the terminal and the configured environment variable.
+
+Example request:
+
+```bash
+curl -s https://api.experientiallabs.ai/v1/models \
+  -H "Authorization: Bearer $EXPLABS_API_KEY"
+```
+
+The API returned a list of available models, confirming that the configured key could authenticate successfully for that request.
+
+A separate request to the Responses API returned an authentication error:
+
+```text
+A valid gateway Bearer key is required.
+```
+
+This demonstrated that **a key being set in the environment does not automatically mean every API request is valid**. The request format, endpoint, and provider requirements must also be correct.
+
+## Discovering Available Models
+
+The `/v1/models` endpoint was used to discover the models available through the provider.
+
+The returned list included models from several model families, such as GPT, Claude, Gemini, DeepSeek, and others.
+
+This investigation helped identify which model names could be used in API requests.
+
+Example model identifiers discovered during testing included:
+
+```text
+gpt-5-mini
+gpt-5-image
+gpt-6-astra
+claude-sonnet-4.5
+gemini-2.5-flash
+deepseek-r1
+```
+
+The actual model availability and access permissions depend on the provider's current configuration.
+
+## Selecting the AI Model
+
+The selected model is specified in the API request.
+
+Example:
+
+```python
+response = client.responses.create(
+    model="gpt-6-astra",
+    input=message
+)
+```
+
+Model selection is important because different models may support different capabilities, such as text generation, reasoning, coding, or image generation.
+
+The project tested model availability before selecting a model for the chat application.
+
+## Free Model Investigation
+
+The provider dashboard showed a credit balance and information about platform-funded requests.
+
+The project also investigated models with names containing `free`.
+
+However, a model being listed as free does not necessarily mean that every request is free or that it is available for every API endpoint.
+
+The actual cost and access depend on the provider's billing and model configuration.
+
+## Frontend Development
+
+The frontend was designed as a simple AI workspace.
+
+It includes:
+
+* Application branding
+* Sidebar navigation
+* Conversation area
+* Message input
+* Send button
+* AI response display
+* Error message display
+
+The frontend was designed to provide a clean interface for interacting with the AI assistant.
+
+## Frontend-to-Backend Communication
+
+The frontend communicates with the Flask backend through an HTTP request.
+
+The basic flow is:
+
+```text
+User enters message
+        ↓
+Frontend sends POST /chat
+        ↓
+Flask receives the request
+        ↓
+Flask sends the message to the AI API
+        ↓
+AI API returns a response
+        ↓
+Flask returns JSON
+        ↓
+Frontend displays the response
+```
+
+This separation allows the frontend to focus on user interaction while the backend handles API communication.
+
+## Running the Application
+
+The application is started using the Flask development server.
+
+Example:
+
+```bash
+python app.py
+```
+
+The application can then be accessed through:
+
+```text
+http://127.0.0.1:5000
+```
+
+The Flask development server is suitable for local testing and learning. A production deployment would require a production WSGI server and additional security configuration.
+
+## First Chat API Test
+
+The first successful chat test confirmed that the application could receive a user message and return an AI-generated response.
+
+A question about quantum computing was entered through the frontend, and the AI response was displayed in the conversation area.
+
+This demonstrated that the basic frontend-to-backend-to-AI communication flow was working.
+
+## Backend Error Handling
+
+During testing, the frontend displayed an error message when it could not connect to the backend server.
+
+This helped identify the importance of checking:
+
+* Whether the Flask server is running
+* Whether the frontend is using the correct endpoint
+* Whether the backend is returning a valid response
+* Whether the API request is being sent correctly
+
+Error handling is important because it helps users understand when a request cannot be completed.
+
+## Image Generation Investigation
+
+The project also investigated whether the external AI API could generate images.
+
+The investigation included:
+
+1. Discovering image-capable model identifiers.
+2. Testing the image-generation endpoint.
+3. Testing the Responses API with an image-capable model.
+4. Checking the returned response structure.
+5. Comparing the expected API behavior with the actual provider response.
+
+The investigation showed that **having an image-capable model listed does not automatically mean that the image-generation endpoint is supported**.
+
+## First Image Generation Test
+
+An image-generation request was attempted using the `/v1/images/generations` endpoint.
+
+The provider returned:
+
+```text
+Unsupported serving path: /v1/images/generations
+```
+
+This indicated that the tested endpoint was not supported by the provider's gateway.
+
+The test was useful because it demonstrated the importance of checking the provider's supported API paths instead of assuming that every OpenAI-compatible provider supports every endpoint.
+
+## Testing the Responses API
+
+The Responses API was also tested using an image-capable model.
+
+The request returned a completed response object, but the response contained an empty output array:
+
+```json
+{
+  "status": "completed",
+  "output": []
+}
+```
+
+The response also included usage information.
+
+This showed that **a request can complete without producing the expected image output**. The response structure must be inspected to determine whether the requested capability was actually returned.
+
+## Lesson From Image Testing
+
+The image-generation investigation highlighted several important lessons:
+
+* Model availability and endpoint availability are different.
+* OpenAI-compatible APIs may not support every OpenAI endpoint.
+* A successful HTTP response does not always mean the expected output was generated.
+* The provider's documentation should be checked before implementing a new capability.
+* Image generation should be tested separately from text chat functionality.
+
+## Current Image Generation Status
+
+The current project successfully demonstrates the **text chat workflow**.
+
+Image generation remains an **investigated capability** rather than a completed feature.
+
+The tested image-generation endpoint was unsupported, and the Responses API test did not return the expected image output.
+
+Further implementation would require confirming the provider's supported image-generation API and response format.
+
+## Security Considerations
+
+The project follows basic API security practices:
+
+* API keys are stored in environment variables.
+* API keys are not included in frontend code.
+* API keys should not be committed to GitHub.
+* The virtual environment is excluded from version control.
+* The application is tested locally before deployment.
+
+Additional security improvements would be required before using the application in a production environment.
+
+## Current Architecture
+
+```text
+Browser
+   │
+   ▼
+Frontend
+(index.html)
+   │
+   ▼
+Flask Backend
+(app.py)
+   │
+   ▼
+External AI API
+   │
+   ▼
+Selected AI Model
+   │
+   ▼
+AI Response
+   │
+   ▼
+Frontend Display
+```
+
+## Current Project Status
+
+| Component                      | Status            |
+| ------------------------------ | ----------------- |
+| Flask backend                  | Completed         |
+| Frontend interface             | Completed         |
+| AI API integration             | Completed         |
+| API key configuration          | Completed         |
+| Model discovery                | Completed         |
+| Chat testing                   | Completed         |
+| Backend error handling         | Implemented       |
+| Image-generation investigation | Completed         |
+| Image-generation feature       | Not yet completed |
+| GitHub documentation           | In progress       |
+
+## Future Improvements
+
+The project may later be expanded with:
+
+* User authentication
+* Conversation history
+* Database integration
+* Multiple model selection
+* Better error handling
+* Production deployment
+* Image-generation support
+* File upload support
+* Improved frontend design
+* API usage monitoring
+* Rate limiting
+
+## Key Technical Lessons Learned
+
+This project helped develop practical understanding of:
+
+* Flask application development
+* REST API communication
+* Environment variables
+* API authentication
+* Model discovery
+* Frontend-to-backend communication
+* HTTP request and response handling
+* Error troubleshooting
+* API endpoint compatibility
+* Git and GitHub project organization
+
+## Conclusion
+
+Astra AI was developed as a practical project to understand how an AI-powered web application is built.
+
+The project successfully demonstrates the integration of a Flask backend with an external AI API and provides a working text chat interface.
+
+The image-generation investigation also provided valuable experience in testing API capabilities, understanding endpoint limitations, and troubleshooting unexpected responses.
+
+The project documentation records the development process, testing results, and lessons learned throughout the implementation.
+
+## Documentation
+
+Detailed project documentation is available in:
+
+```text
+docs/project-documentation.md
+```
+
+The documentation includes:
+
+* Project overview
+* Architecture
+* Development environment
+* Project files
+* Flask backend development
+* AI API integration
+* API key security
+* Authentication testing
+* Model discovery
+* Model selection
+* Free model investigation
+* Frontend development
+* Frontend-to-backend communication
+* Application execution
+* Chat testing
+* Error handling
+* Image-generation investigation
+* API testing
+* Current project status
+* Future improvements
+* Technical lessons learned
+
+## Screenshots
+
+Screenshots of the development process and application testing are available in:
+
+```text
+screenshots/
+```
+
+They include the project structure, backend code, running Flask server, frontend interface, error handling, and successful chat response.
+
+## Author
+
+**Krishna**
+
+Cybersecurity Student | Python | Flask | API Integration | AI Projects
+
