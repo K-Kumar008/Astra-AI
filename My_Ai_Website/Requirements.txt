@@ -1,0 +1,82 @@
+Create a file named `requirements.txt` inside your `my-ai-website` folder.
+
+### `requirements.txt`
+
+```
+flask
+openai
+```
+
+### Create it in Kali
+
+Bash
+
+```
+cd ~/my-ai-website
+nano requirements.txt
+```
+
+Paste the two lines above, then save:
+
+* Ctrl + O → Enter
+
+* Ctrl + X
+
+### What these packages do
+
+|
+Package
+
+|
+
+Purpose
+
+|
+| --- | --- |
+|
+
+`flask`
+
+|
+
+Runs your Python web server and handles frontend requests.
+
+|
+|
+
+`openai`
+
+|
+
+Provides the Python SDK used to communicate with the Experiential Labs API.
+
+|
+
+### Install the requirements
+
+Since you already have your virtual environment:
+
+Bash
+
+```
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Verify
+
+Bash
+
+```
+pip list
+```
+
+You should see Flask and openai installed.
+
+For GitHub: Upload `requirements.txt`, but do not upload `venv/`. Anyone downloading your project can install the dependencies using:
+
+Bash
+
+```
+pip install -r requirements.txt
+```
